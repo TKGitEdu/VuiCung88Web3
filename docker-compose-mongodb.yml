@@ -1,0 +1,24 @@
+# MongoDB container
+version: '3.8'
+
+services:
+  # MongoDB service chạy riêng
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=reward_game_db
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

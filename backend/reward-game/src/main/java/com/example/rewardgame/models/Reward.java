@@ -17,4 +17,10 @@ public class Reward {
     private int points;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Constructor để tự động set timestamp
+    public Reward() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 }

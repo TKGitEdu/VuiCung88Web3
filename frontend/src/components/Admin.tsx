@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useTheme } from '../context/ThemeContext';
 
 interface Reward {
     id: string;
@@ -20,6 +21,7 @@ const Admin: React.FC = () => {
     const [rewards, setRewards] = useState<Reward[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [token, setToken] = useState<string | null>(null);
+    const { darkMode } = useTheme(); // Use theme context to adapt UI to current theme
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -54,17 +56,18 @@ const Admin: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold">Admin Panel</h1>
+        <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} transition-colors duration-300`}>
+            <div className="container mx-auto p-6">
+                <h1 className="text-3xl font-bold border-b pb-4 mb-6 border-gray-200 dark:border-gray-700">Admin Panel</h1>
 
-            <div className="mt-4">
-                <h2 className="text-xl font-bold">Rewards</h2>
-                {/* Add form to create/edit rewards here */}
-            </div>
+                <div className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Rewards</h2>
+                    {/* Add form to create/edit rewards here */}
+                </div>
 
-            <div className="mt-4">
-                <h2 className="text-xl font-bold">Users</h2>
-                <table className="min-w-full bg-white dark:bg-gray-800">
+                <div className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Users</h2>
+                    <table className="min-w-full bg-white dark:bg-gray-800">
                     <thead>
                         <tr>
                             <th className="py-2">Username</th>
@@ -80,6 +83,7 @@ const Admin: React.FC = () => {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );
