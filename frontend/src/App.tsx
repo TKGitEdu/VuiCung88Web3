@@ -5,6 +5,7 @@ import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import Game from './components/Game';
 import Admin from './components/Admin';
+import TicTacToe from './components/TicTacToe';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 // Main application component that uses ThemeContext
@@ -21,6 +22,7 @@ const AppContent: React.FC = () => {
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/game" element={<Game />} />
                         <Route path="/admin" element={<Admin />} />
+                        <Route path="/tic-tac-toe" element={<TicTacToe />} />
                         <Route path="/" element={<Navigate to="/login" />} />
                     </Routes>
                 </Router>

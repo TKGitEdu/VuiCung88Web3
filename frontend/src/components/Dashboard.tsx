@@ -20,9 +20,25 @@ interface SpinHistory {
     spinTime: string;
 }
 
+interface LeaderboardUser {
+    username: string;
+    points: number;
+}
+
+interface RecentMatch {
+    id: string;
+    gameType: string;
+    result: string;
+    betAmount: number;
+    rewardAmount: number;
+    timestamp: string;
+}
+
 const Dashboard = () => {
     const [user, setUser] = useState<User | null>(null);
     const [history, setHistory] = useState<SpinHistory[]>([]);
+    const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
+    const [recentMatches, setRecentMatches] = useState<RecentMatch[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -44,7 +60,10 @@ const Dashboard = () => {
                     const parsedUser = JSON.parse(storedUser);
                     if (parsedUser && parsedUser.token) {
                         setUser(parsedUser);
-                        await fetchHistory(`${parsedUser.type || 'Bearer'} ${parsedUser.token}`);
+                        const token = `${parsedUser.type || 'Bearer'} ${parsedUser.token}`;
+                        await fetchHistory(token);
+                        await fetchLeaderboard(token);
+                        await fetchRecentMatches(token);
                     } else {
                         console.error('Invalid user data in localStorage');
                         navigate('/login');
@@ -71,6 +90,30 @@ const Dashboard = () => {
             setHistory(response.data);
         } catch (error) {
             console.error('Failed to fetch history', error);
+        }
+    };
+
+    // Fetch leaderboard
+    const fetchLeaderboard = async (token: string) => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/dashboard/leaderboard', {
+                headers: { Authorization: token },
+            });
+            setLeaderboard(response.data);
+        } catch (error) {
+            console.error('Failed to fetch leaderboard', error);
+        }
+    };
+
+    // Fetch recent matches
+    const fetchRecentMatches = async (token: string) => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/dashboard/recent-matches', {
+                headers: { Authorization: token },
+            });
+            setRecentMatches(response.data);
+        } catch (error) {
+            console.error('Failed to fetch recent matches', error);
         }
     };
 
@@ -219,7 +262,20 @@ const Dashboard = () => {
                                                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
                                                 <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"></path>
                                             </svg>
-                                            Chơi Game
+                                            Spin Game
+                                        </Link>
+                                        <Link
+                                            to="/tic-tac-toe"
+                                            className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
+                                            onClick={() => {
+                                                setShowDropdown(false);
+                                                playSoundWithFallback('click');
+                                            }}
+                                        >
+                                            <svg className="w-5 h-5 mr-3 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                            Tic-Tac-Toe
                                         </Link>
                                         {user.roles && user.roles.includes('ROLE_ADMIN') && (
                                             <Link 
@@ -302,6 +358,42 @@ const Dashboard = () => {
                                 <p className="text-gray-600 dark:text-gray-400">{history.length} lần quay thưởng</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Leaderboard and Recent Matches */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    {/* Leaderboard */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Leaderboard</h2>
+                        <ul>
+                            {leaderboard.map((player, index) => (
+                                <li key={index} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                                    <span className="font-medium text-gray-800 dark:text-gray-200">{player.username}</span>
+                                    <span className="text-gray-600 dark:text-gray-400">{player.points} points</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Recent Matches */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Recent Matches</h2>
+                        <ul>
+                            {recentMatches.map((match) => (
+                                <li key={match.id} className="py-2 border-b border-gray-200 dark:border-gray-700">
+                                    <div className="flex justify-between">
+                                        <span className="font-medium text-gray-800 dark:text-gray-200">{match.gameType}</span>
+                                        <span className={`font-bold ${match.result === 'WIN' ? 'text-green-500' : match.result === 'LOSE' ? 'text-red-500' : 'text-gray-500'}`}>
+                                            {match.result}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                        Bet: {match.betAmount}, Reward: {match.rewardAmount}
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
                 
